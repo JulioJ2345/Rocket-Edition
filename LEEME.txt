@@ -1,0 +1,9 @@
+ROCKET BOX — Sprites automáticos pixel art (v4)
+
+1. Publica la carpeta rocket_tracker en HTTPS (por ejemplo GitHub Pages) y abre la PWA en Chrome.
+2. Añade un Pokémon por especie: con conexión, la aplicación consulta PokeAPI para encontrar el número de Pokédex y muestra su sprite pixel art automáticamente. También puedes introducir el número de Pokédex manualmente para evitar la consulta.
+3. Los sprites oficiales se sirven desde raw.githubusercontent.com/PokeAPI/sprites y no se incluyen en el ZIP. El service worker almacena en caché los sprites ya vistos para uso offline posterior (sujeto a que Android no borre la caché).
+4. Para Pokémon propios del hackrom, guarda la ficha, vuelve a abrirla y pulsa Asignar sprite. El archivo PNG/WebP se guarda en el dispositivo.
+5. La app funciona sin conexión para gestionar equipo, vidas, cajas y zonas. Los sprites aún no vistos y las búsquedas de especies nuevas requieren internet.
+6. Exporta e importa JSON desde Datos. El JSON incluye la Pokédex detectada, pero no los archivos de imágenes personalizadas.
+7. Si sustituyes una versión anterior en el mismo dominio/ruta, los datos guardados en localStorage se conservan.
