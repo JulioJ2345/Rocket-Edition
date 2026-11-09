@@ -1,4 +1,4 @@
-const CACHE='rocket-box-v4';
+const CACHE='rocket-box-v5';
 const SPRITES='rocket-box-pokemon-sprites-v1';
 const FILES=['./','./index.html','./style.css','./app.js','./manifest.webmanifest','./icon.svg','./icon-192.png','./icon-512.png'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES)).then(()=>self.skipWaiting())));
