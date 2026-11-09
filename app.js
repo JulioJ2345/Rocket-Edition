@@ -29,7 +29,7 @@ async function fetchPokemonDetails(name){
  const key=normalizedSpecies(name);if(!key)return null;
  if(!pokemonDetails.has(key))pokemonDetails.set(key,(async()=>{
   try{const r=await fetch(POKEAPI_ROOT+encodeURIComponent(SPECIES_ALIASES[key]||key));if(!r.ok)return null;const data=await r.json();return {id:data.id,types:data.types.sort((a,b)=>a.slot-b.slot).map(x=>TYPE_ES[x.type.name]||x.type.name)}}catch{return null}
- })());return pokemonDetails.get(key);
+ })());const result=await pokemonDetails.get(key);if(!result)pokemonDetails.delete(key);return result;
 }
 let speciesRequest=0;
 async function autofillSpecies(){
@@ -37,7 +37,7 @@ async function autofillSpecies(){
  if(!name){info.textContent='Introduce una especie oficial o una personalizada.';return}
  info.textContent='Buscando en PokéAPI…';
  const result=await fetchPokemonDetails(name);if(request!==speciesRequest||f.elements.species.value.trim()!==name)return;
- if(!result){info.textContent='No encontrada o sin conexión. Puedes introducir los datos manualmente.';return}
+ if(!result){info.textContent='No encontrada o sin conexión. Comprueba internet y vuelve a salir del campo de especie.';return}
  // No pisar campos modificados por el usuario, ni los valores de fichas existentes.
  if(!editing||!f.elements.dex.value)f.elements.dex.value=result.id;
  if(!editing||!f.elements.type1.value)f.elements.type1.value=result.types[0]||'';
@@ -90,7 +90,7 @@ function openZone(id=null){zoneEditing=id;const z=db.zones.find(x=>x.id===id);co
 function download(name,body,type){const url=URL.createObjectURL(new Blob([body],{type}));const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),2000)}
 function exportJSON(){download('rocket-nuzlocke-'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify(db,null,2),'application/json');toast('Copia exportada')}
 function validImport(o){if(!o||typeof o!=='object'||!Array.isArray(o.pokemon)||!Array.isArray(o.zones))throw Error('El JSON debe contener pokemon y zones como listas');if(o.pokemon.length>3000)throw Error('Demasiados Pokémon');for(const p of o.pokemon){if(!p||typeof p.species!=='string'||!['team','box','grave'].includes(p.location)||!Number.isInteger(Number(p.lives))||Number(p.lives)<0||Number(p.lives)>3)throw Error('Ficha Pokémon inválida')}for(const z of o.zones)if(!z||typeof z.name!=='string')throw Error('Zona inválida');return {...initial(),...o,pokemon:o.pokemon.map(p=>({...p,id:p.id||uid()})),zones:o.zones.map(z=>({...z,id:z.id||uid()}))}}
-function summary(){return 'Rocket Edition · Normal · cap '+db.levelCap+'\n'+db.pokemon.map(p=>[(p.nickname||p.species)+' ('+p.species+')','Nv '+p.level,p.lives+'/3 vidas',p.location,p.nature||'',p.ability||'',p.status||'',p.zone||'',Array.from({length:4},(_,i)=>p['move'+(i+1)]).filter(Boolean).join('/')].filter(Boolean).join(' · ')).join('\n')+'\nZonas: '+db.zones.map(z=>z.name+' ('+z.state+')').join(', ')}
+function summary(){return 'Rocket Edition · Normal · cap '+db.levelCap+'\n'+db.pokemon.map(p=>[(p.nickname||p.species)+' ('+p.species+')','Nv '+p.level,p.lives+'/3 vidas',p.location,p.nature||'',p.ability||'',p.zone||'',Array.from({length:4},(_,i)=>p['move'+(i+1)]).filter(Boolean).join('/')].filter(Boolean).join(' · ')).join('\n')+'\nZonas: '+db.zones.map(z=>z.name+' ('+z.state+')').join(', ')}
 document.querySelector('nav').addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(b){tab=b.dataset.tab;render()}});
 $('add').onclick=()=>tab==='zones'?openZone():openEditor();$('uploadSprite').onclick=()=>$('spriteFile').click();
 $('spriteFile').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f||!editing)return;if(f.size>3*1024*1024)return toast('Usa una imagen de menos de 3 MB');try{await spritePut('custom:'+editing,f);const p=db.pokemon.find(x=>x.id===editing);if(p){p.customSprite=true;delete p.sprite;save();toast('Sprite personalizado guardado');render()}}catch(err){alert('No se pudo guardar la imagen: '+err.message)}};

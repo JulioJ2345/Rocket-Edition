@@ -1,4 +1,4 @@
-const CACHE='rocket-box-v5';
+const CACHE='rocket-box-v7';
 const SPRITES='rocket-box-pokemon-sprites-v1';
 const FILES=['./','./index.html','./style.css','./app.js','./manifest.webmanifest','./icon.svg','./icon-192.png','./icon-512.png'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES)).then(()=>self.skipWaiting())));
@@ -13,5 +13,5 @@ self.addEventListener('fetch',event=>{
   try{const response=await fetch(request);if(response.ok)event.waitUntil(cache.put(request,response.clone()));return response}catch{return Response.error()}
  }));return}
  if(url.origin!==self.location.origin)return;
- event.respondWith(caches.match(request).then(cached=>cached||fetch(request).then(response=>{if(response.ok)event.waitUntil(caches.open(CACHE).then(cache=>cache.put(request,response.clone())));return response})));
+ event.respondWith(fetch(request).then(response=>{if(response.ok)event.waitUntil(caches.open(CACHE).then(cache=>cache.put(request,response.clone())));return response}).catch(()=>caches.match(request)));
 });
